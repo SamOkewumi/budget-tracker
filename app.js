@@ -3,19 +3,20 @@ let expenses = [];
 let currentMonth = new Date();
 let currentFilter = 'all';
 
-// Category configuration
+// Category configuration (updated without emojis)
 const categories = {
-    housing: { name: 'Housing', emoji: '🏠', color: '#3B82F6' },
-    utilities: { name: 'Utilities', emoji: '⚡', color: '#EAB308' },
-    groceries: { name: 'Groceries', emoji: '🛒', color: '#10B981' },
-    dining: { name: 'Eating Out', emoji: '🍔', color: '#EC4899' },
-    transportation: { name: 'Transportation', emoji: '🚗', color: '#F97316' },
-    subscriptions: { name: 'Subscriptions', emoji: '📺', color: '#8B5CF6' },
-    healthcare: { name: 'Healthcare', emoji: '🏥', color: '#14B8A6' },
-    shopping: { name: 'Shopping', emoji: '🛍️', color: '#A855F7' },
-    entertainment: { name: 'Entertainment', emoji: '🎬', color: '#F43F5E' },
-    other: { name: 'Other', emoji: '📦', color: '#64748B' }
+    housing: { name: 'Housing', color: '#3B82F6' },
+    utilities: { name: 'Utilities', color: '#EAB308' },
+    groceries: { name: 'Groceries', color: '#10B981' },
+    dining: { name: 'Eating Out', color: '#EC4899' },
+    transportation: { name: 'Transportation', color: '#F97316' },
+    subscriptions: { name: 'Subscriptions', color: '#8B5CF6' },
+    healthcare: { name: 'Healthcare', color: '#14B8A6' },
+    shopping: { name: 'Shopping', color: '#A855F7' },
+    entertainment: { name: 'Entertainment', color: '#F43F5E' },
+    other: { name: 'Other', color: '#64748B' }
 };
+
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
@@ -144,7 +145,7 @@ function deleteExpense(id) {
     updateSummary();
 }
 
-// Render expenses list
+// Render expenses list - REDESIGNED
 function renderExpenses() {
     const container = document.getElementById('expenses-list');
     const filtered = getFilteredExpenses();
@@ -152,8 +153,10 @@ function renderExpenses() {
     if (filtered.length === 0) {
         container.innerHTML = `
             <div class="text-center py-12 text-slate-400">
-                <div class="text-6xl mb-4">📊</div>
-                <p>No expenses found</p>
+                <svg class="w-20 h-20 mx-auto mb-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <p class="text-lg font-medium">No expenses found</p>
                 <p class="text-sm mt-2">${currentFilter === 'all' ? 'Add your first expense' : 'Try a different filter'}</p>
             </div>
         `;
@@ -163,35 +166,65 @@ function renderExpenses() {
     // Sort by date (newest first)
     filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
     
-    let html = '<div class="space-y-3">';
+    let html = '<div class="space-y-2">';
     
     filtered.forEach(expense => {
         const cat = categories[expense.category];
+        const iconColor = cat.color;
+        
         html += `
-            <div class="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:border-indigo-300 transition-colors">
-                <div class="flex items-center gap-4 flex-1 min-w-0">
-                    <div class="text-3xl">${cat.emoji}</div>
-                    <div class="flex-1 min-w-0">
-                        <div class="font-semibold text-slate-900 truncate">${expense.description}</div>
-                        <div class="text-sm text-slate-500">
-                            ${formatDate(expense.date)} • ${cat.name}
-                            ${expense.recurring ? ' • 🔄 Recurring' : ''}
-                        </div>
+            <div class="group flex items-center gap-4 p-4 bg-white border border-slate-200 rounded-xl hover:border-slate-300 hover:shadow-sm transition-all cursor-pointer" onclick="editExpense('${expense.id}')">
+                <!-- Icon -->
+                <div class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center" style="background-color: ${iconColor}15; color: ${iconColor}">
+                    ${getCategoryIcon(expense.category)}
+                </div>
+                
+                <!-- Content -->
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-1">
+                        <h3 class="font-semibold text-slate-900 truncate">${expense.description}</h3>
+                        ${expense.recurring ? '<span class="flex-shrink-0 text-xs px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full">Recurring</span>' : ''}
+                    </div>
+                    <div class="flex items-center gap-2 text-sm text-slate-500">
+                        <span>${formatDate(expense.date)}</span>
+                        <span>•</span>
+                        <span>${cat.name}</span>
                     </div>
                 </div>
-                <div class="flex items-center gap-4">
-                    <div class="text-xl font-bold text-slate-900">$${expense.amount.toFixed(2)}</div>
-                    <div class="flex gap-1">
-                        <button onclick="editExpense('${expense.id}')" 
-                                class="p-2 text-slate-400 hover:text-indigo-600"
-                                title="Edit">
-                            ✏️
+                
+                <!-- Amount & Actions -->
+                <div class="flex items-center gap-3">
+                    <div class="text-right">
+                        <div class="text-xl font-bold text-slate-900">$${expense.amount.toFixed(2)}</div>
+                    </div>
+                    
+                    <!-- Three Dot Menu -->
+                    <div class="relative">
+                        <button onclick="event.stopPropagation(); toggleExpenseMenu('${expense.id}')" 
+                                class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                                id="menu-btn-${expense.id}">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+                            </svg>
                         </button>
-                        <button onclick="deleteExpense('${expense.id}')" 
-                                class="p-2 text-slate-400 hover:text-red-600"
-                                title="Delete">
-                            🗑️
-                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div id="menu-${expense.id}" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-50">
+                            <button onclick="event.stopPropagation(); editExpense('${expense.id}'); closeAllMenus();" 
+                                    class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                                Edit
+                            </button>
+                            <button onclick="event.stopPropagation(); deleteExpense('${expense.id}'); closeAllMenus();" 
+                                    class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                                Delete
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -201,6 +234,7 @@ function renderExpenses() {
     html += '</div>';
     container.innerHTML = html;
 }
+
 
 // Get filtered expenses for current month and category
 function getFilteredExpenses() {
@@ -215,28 +249,35 @@ function getFilteredExpenses() {
     });
 }
 
-// Render category filter buttons
+// Render category filter buttons - WITH SVG ICONS
 function renderCategoryFilters() {
     const container = document.getElementById('category-filters');
     let html = `
         <button onclick="filterByCategory('all')" 
-                class="px-4 py-2 rounded-lg ${currentFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'} whitespace-nowrap">
+                class="px-4 py-2 rounded-lg ${currentFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-700 border border-slate-200'} whitespace-nowrap flex items-center gap-2 transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+            </svg>
             All
         </button>
     `;
     
     Object.keys(categories).forEach(key => {
         const cat = categories[key];
+        const isActive = currentFilter === key;
         html += `
             <button onclick="filterByCategory('${key}')" 
-                    class="px-4 py-2 rounded-lg ${currentFilter === key ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'} whitespace-nowrap">
-                ${cat.emoji} ${cat.name}
+                    class="px-4 py-2 rounded-lg ${isActive ? 'bg-indigo-600 text-white' : 'bg-white text-slate-700 border border-slate-200'} whitespace-nowrap flex items-center gap-2 transition-colors"
+                    style="${isActive ? '' : `color: ${cat.color}`}">
+                ${getCategoryIcon(key, 'w-4 h-4')}
+                ${cat.name}
             </button>
         `;
     });
     
     container.innerHTML = html;
 }
+
 
 // Filter by category
 function filterByCategory(category) {
@@ -403,6 +444,27 @@ document.getElementById('settings-modal')?.addEventListener('click', function(e)
         closeSettings();
     }
 });
+
+// Three-dot menu functions
+function toggleExpenseMenu(id) {
+    closeAllMenus(); // Close other menus first
+    const menu = document.getElementById(`menu-${id}`);
+    menu.classList.toggle('hidden');
+}
+
+function closeAllMenus() {
+    document.querySelectorAll('[id^="menu-"]').forEach(menu => {
+        menu.classList.add('hidden');
+    });
+}
+
+// Close menus when clicking outside
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('[id^="menu-btn-"]') && !e.target.closest('[id^="menu-"]')) {
+        closeAllMenus();
+    }
+});
+
 
 // Load demo data
 function loadDemoData() {
