@@ -1,0 +1,80 @@
+/* Modal animations - FIXED */
+#expense-modal,
+#settings-modal {
+    transition: opacity 0.3s ease-out;
+}
+
+#expense-modal > div,
+#settings-modal > div {
+    transition: all 0.3s ease-out;
+}
+
+/* Mobile: slide up from bottom */
+@media (max-width: 640px) {
+    #expense-modal > div > div,
+    #settings-modal > div > div {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Desktop: scale and fade */
+@media (min-width: 641px) {
+    #expense-modal > div > div,
+    #settings-modal > div > div {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Loading animation */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.loading {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Touch feedback */
+button:active {
+    transform: scale(0.98);
+}
+
+/* Focus styles for accessibility */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid #4F46E5;
+    outline-offset: 2px;
+}
