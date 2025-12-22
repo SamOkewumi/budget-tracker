@@ -1,14 +1,16 @@
 const CACHE_NAME = 'budget-tracker-v1';
+const BASE_PATH = '/budget-tracker'; // Change to your repo name
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/app.js',
-  '/storage.js',
-  '/styles.css',
-  '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png'
+  BASE_PATH + '/',
+  BASE_PATH + '/index.html',
+  BASE_PATH + '/app.js',
+  BASE_PATH + '/storage.js',
+  BASE_PATH + '/styles.css',
+  BASE_PATH + '/manifest.json',
+  BASE_PATH + '/icons/icon-192.png',
+  BASE_PATH + '/icons/icon-512.png'
 ];
+
 
 // Install service worker and cache assets
 self.addEventListener('install', event => {
