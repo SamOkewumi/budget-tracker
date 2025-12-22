@@ -145,7 +145,7 @@ function deleteExpense(id) {
     updateSummary();
 }
 
-// Render expenses list - MOBILE OPTIMIZED
+// Render expenses list - ICON BESIDE CATEGORY
 function renderExpenses() {
     const container = document.getElementById('expenses-list');
     const filtered = getFilteredExpenses();
@@ -173,13 +173,8 @@ function renderExpenses() {
         const iconColor = cat.color;
         
         html += `
-            <div class="group flex items-start gap-2.5 p-3 bg-white border border-slate-200 rounded-xl hover:border-slate-300 hover:shadow-sm transition-all cursor-pointer" onclick="editExpense('${expense.id}')">
-                <!-- Icon - Smaller -->
-                <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center" style="background-color: ${iconColor}20; color: ${iconColor}">
-                    ${getCategoryIcon(expense.category, 'w-5 h-5')}
-                </div>
-                
-                <!-- Content -->
+            <div class="group flex items-start justify-between gap-3 p-3 bg-white border border-slate-200 rounded-xl hover:border-slate-300 hover:shadow-sm transition-all cursor-pointer" onclick="editExpense('${expense.id}')">
+                <!-- Left: Content -->
                 <div class="flex-1 min-w-0">
                     <!-- Row 1: Description + Price -->
                     <div class="flex items-start justify-between gap-2 mb-1">
@@ -189,17 +184,20 @@ function renderExpenses() {
                         </div>
                     </div>
                     
-                    <!-- Row 2: Date, Category, Recurring Badge -->
+                    <!-- Row 2: Date, Icon + Category, Recurring Badge -->
                     <div class="flex items-center gap-1.5 text-xs text-slate-500 flex-wrap">
                         <span>${formatDate(expense.date)}</span>
                         <span>•</span>
-                        <span>${cat.name}</span>
-                        ${expense.recurring ? '<span>•</span><span class="inline-flex items-center px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full font-medium text-xs">Recurring</span>' : ''}
+                        <span class="inline-flex items-center gap-1" style="color: ${iconColor}">
+                            ${getCategoryIcon(expense.category, 'w-3.5 h-3.5')}
+                            <span class="text-slate-500">${cat.name}</span>
+                        </span>
+                        ${expense.recurring ? '<span>•</span><span class="inline-flex items-center px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full font-medium">Recurring</span>' : ''}
                     </div>
                 </div>
                 
-                <!-- Three Dot Menu - Aligned to top -->
-                <div class="relative flex-shrink-0 self-start pt-0.5">
+                <!-- Right: Three Dot Menu -->
+                <div class="relative flex-shrink-0 self-start">
                     <button onclick="event.stopPropagation(); toggleExpenseMenu('${expense.id}')" 
                             class="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
                             id="menu-btn-${expense.id}">
@@ -233,6 +231,7 @@ function renderExpenses() {
     html += '</div>';
     container.innerHTML = html;
 }
+
 
 
 
