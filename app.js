@@ -33,13 +33,23 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// Modal functions - SIMPLIFIED
+// Open expense modal for adding
 function openExpenseModal() {
+    // Reset form
     document.getElementById('expense-form').reset();
     document.getElementById('expense-id').value = '';
-    document.getElementById('expense-date').value = new Date().toISOString().split('T')[0];
     document.getElementById('modal-title').textContent = 'Add Expense';
+    
+    // Set today's date
+    document.getElementById('expense-date').value = new Date().toISOString().split('T')[0];
+    
+    // Hide frequency field
     document.getElementById('frequency-field').classList.add('hidden');
+    
+    // Hide delete button when adding new
+    document.getElementById('delete-expense-btn').classList.add('hidden');
+    
+    // Show modal
     document.getElementById('expense-modal').classList.remove('hidden');
 }
 
@@ -118,7 +128,11 @@ function handleExpenseSubmit(event) {
 function editExpense(id) {
     const expense = expenses.find(e => e.id === id);
     if (!expense) return;
-
+    
+    // Update modal title
+    document.getElementById('modal-title').textContent = 'Edit Expense';
+    
+    // Fill form fields
     document.getElementById('expense-id').value = expense.id;
     document.getElementById('expense-date').value = expense.date;
     document.getElementById('expense-description').value = expense.description;
@@ -127,13 +141,18 @@ function editExpense(id) {
     document.getElementById('expense-recurring').checked = expense.recurring;
     document.getElementById('expense-frequency').value = expense.frequency || 'monthly';
     document.getElementById('expense-notes').value = expense.notes || '';
-    document.getElementById('modal-title').textContent = 'Edit Expense';
-
+    
+    // Show/hide frequency field
     const frequencyField = document.getElementById('frequency-field');
     frequencyField.classList.toggle('hidden', !expense.recurring);
-
-    showModal('expense-modal');
+    
+    // Show delete button in edit mode
+    document.getElementById('delete-expense-btn').classList.remove('hidden');
+    
+    // Show modal
+    document.getElementById('expense-modal').classList.remove('hidden');
 }
+
 
 // Delete expense
 function deleteExpense(id) {
@@ -403,6 +422,15 @@ function exportData(format) {
 
         const blob = new Blob([csv], { type: 'text/csv' });
         downloadFile(blob, `budget-tracker-${Date.now()}.csv`);
+    }
+}
+
+// Delete expense from within edit modal
+function deleteCurrentExpense() {
+    const expenseId = document.getElementById('expense-id').value;
+    if (expenseId && confirm('Are you sure you want to delete this expense?')) {
+        deleteExpense(expenseId);
+        closeExpenseModal();
     }
 }
 

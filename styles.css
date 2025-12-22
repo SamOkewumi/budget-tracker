@@ -98,3 +98,20 @@ textarea:focus-visible {
         font-size: 1rem !important; /* 16px */
     }
 }
+
+/* Modal mobile optimization */
+@media (max-width: 640px) {
+    #expense-modal .max-w-lg {
+        max-width: 100%;
+        margin: 0;
+        min-height: 100vh;
+        border-radius: 0;
+    }
+    
+    /* Larger touch targets on mobile */
+    #expense-modal input,
+    #expense-modal select,
+    #expense-modal textarea {
+        font-size: 16px !important; /* Prevents iOS zoom */
+    }
+}
