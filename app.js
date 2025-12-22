@@ -234,8 +234,6 @@ function renderExpenses() {
 
 
 
-
-
 // Search functionality
 let searchQuery = '';
 
