@@ -78,3 +78,23 @@ textarea:focus-visible {
     outline: 2px solid #4F46E5;
     outline-offset: 2px;
 }
+
+/* Mobile-specific optimizations */
+@media (max-width: 640px) {
+    /* Tighter expense cards on mobile */
+    #expenses-list > div > div {
+        padding: 0.625rem !important; /* 10px */
+        gap: 0.5rem !important; /* 8px */
+    }
+    
+    /* Smaller icons on mobile */
+    #expenses-list .w-10 {
+        width: 2rem !important; /* 32px */
+        height: 2rem !important;
+    }
+    
+    /* Slightly smaller amount on mobile */
+    #expenses-list .text-lg {
+        font-size: 1rem !important; /* 16px */
+    }
+}

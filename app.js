@@ -145,11 +145,11 @@ function deleteExpense(id) {
     updateSummary();
 }
 
-// Render expenses list - FIXED LAYOUT (Monarch-style)
+// Render expenses list - MOBILE OPTIMIZED
 function renderExpenses() {
     const container = document.getElementById('expenses-list');
     const filtered = getFilteredExpenses();
-
+    
     if (filtered.length === 0) {
         container.innerHTML = `
             <div class="text-center py-12 text-slate-400">
@@ -162,79 +162,78 @@ function renderExpenses() {
         `;
         return;
     }
-
+    
     // Sort by date (newest first)
     filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
-
+    
     let html = '<div class="space-y-2">';
-
+    
     filtered.forEach(expense => {
         const cat = categories[expense.category];
         const iconColor = cat.color;
-
+        
         html += `
-            <div class="group flex items-center gap-3 p-4 bg-white border border-slate-200 rounded-xl hover:border-slate-300 hover:shadow-sm transition-all cursor-pointer" onclick="editExpense('${expense.id}')">
-                <!-- Icon -->
-                <div class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center" style="background-color: ${iconColor}20; color: ${iconColor}">
-                    ${getCategoryIcon(expense.category)}
+            <div class="group flex items-start gap-2.5 p-3 bg-white border border-slate-200 rounded-xl hover:border-slate-300 hover:shadow-sm transition-all cursor-pointer" onclick="editExpense('${expense.id}')">
+                <!-- Icon - Smaller -->
+                <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center" style="background-color: ${iconColor}20; color: ${iconColor}">
+                    ${getCategoryIcon(expense.category, 'w-5 h-5')}
                 </div>
                 
-                <!-- Content - Full Width -->
+                <!-- Content -->
                 <div class="flex-1 min-w-0">
                     <!-- Row 1: Description + Price -->
-                    <div class="flex items-center justify-between gap-3 mb-1">
-                        <h3 class="font-semibold text-slate-900 truncate">${expense.description}</h3>
-                        <div class="flex items-center gap-2 flex-shrink-0">
-                            ${expense.recurring ? '<span class="text-xs px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full font-medium">Recurring</span>' : ''}
-                            <span class="text-lg font-bold text-slate-900">$${expense.amount.toFixed(2)}</span>
+                    <div class="flex items-start justify-between gap-2 mb-1">
+                        <h3 class="font-semibold text-slate-900 uppercase leading-tight break-words flex-1">${expense.description}</h3>
+                        <div class="flex-shrink-0 text-right">
+                            <div class="text-lg font-bold text-slate-900 whitespace-nowrap">$${expense.amount.toFixed(2)}</div>
                         </div>
                     </div>
                     
-                    <!-- Row 2: Date, Category, Three-dot Menu -->
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2 text-sm text-slate-500">
-                            <span>${formatDate(expense.date)}</span>
-                            <span>•</span>
-                            <span>${cat.name}</span>
-                        </div>
-                        
-                        <!-- Three Dot Menu -->
-                        <div class="relative">
-                            <button onclick="event.stopPropagation(); toggleExpenseMenu('${expense.id}')" 
-                                    class="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                                    id="menu-btn-${expense.id}">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
-                                </svg>
-                            </button>
-                            
-                            <!-- Dropdown Menu -->
-                            <div id="menu-${expense.id}" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-50">
-                                <button onclick="event.stopPropagation(); editExpense('${expense.id}'); closeAllMenus();" 
-                                        class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
-                                    Edit
-                                </button>
-                                <button onclick="event.stopPropagation(); deleteExpense('${expense.id}'); closeAllMenus();" 
-                                        class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                    Delete
-                                </button>
-                            </div>
-                        </div>
+                    <!-- Row 2: Date, Category, Recurring Badge -->
+                    <div class="flex items-center gap-1.5 text-xs text-slate-500 flex-wrap">
+                        <span>${formatDate(expense.date)}</span>
+                        <span>•</span>
+                        <span>${cat.name}</span>
+                        ${expense.recurring ? '<span>•</span><span class="inline-flex items-center px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full font-medium text-xs">Recurring</span>' : ''}
+                    </div>
+                </div>
+                
+                <!-- Three Dot Menu - Aligned to top -->
+                <div class="relative flex-shrink-0 self-start pt-0.5">
+                    <button onclick="event.stopPropagation(); toggleExpenseMenu('${expense.id}')" 
+                            class="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                            id="menu-btn-${expense.id}">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+                        </svg>
+                    </button>
+                    
+                    <!-- Dropdown Menu -->
+                    <div id="menu-${expense.id}" class="hidden absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-50">
+                        <button onclick="event.stopPropagation(); editExpense('${expense.id}'); closeAllMenus();" 
+                                class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            Edit
+                        </button>
+                        <button onclick="event.stopPropagation(); deleteExpense('${expense.id}'); closeAllMenus();" 
+                                class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Delete
+                        </button>
                     </div>
                 </div>
             </div>
         `;
     });
-
+    
     html += '</div>';
     container.innerHTML = html;
 }
+
 
 
 
@@ -365,12 +364,22 @@ function updateMonthDisplay() {
     document.getElementById('current-month').textContent = currentMonth.toLocaleDateString('en-US', options);
 }
 
-// Helper: Format date - MORE COMPACT
+// Helper: Format date - MOBILE OPTIMIZED
 function formatDate(dateString) {
     const date = new Date(dateString);
-    const options = { month: 'short', day: 'numeric', year: 'numeric' };
-    return date.toLocaleDateString('en-US', options);
+    const isMobile = window.innerWidth < 640;
+    
+    if (isMobile) {
+        // Shorter format for mobile: "Dec 21"
+        const options = { month: 'short', day: 'numeric' };
+        return date.toLocaleDateString('en-US', options);
+    } else {
+        // Full format for desktop: "Dec 21, 2025"
+        const options = { month: 'short', day: 'numeric', year: 'numeric' };
+        return date.toLocaleDateString('en-US', options);
+    }
 }
+
 
 
 // Export data 
