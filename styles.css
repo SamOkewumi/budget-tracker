@@ -159,3 +159,15 @@ textarea:focus {
 #treemap-chart svg text {
     transition: none !important;
 }
+
+/* Fix date input width on mobile */
+input[type="date"] {
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+}
+
+/* Ensure date picker doesn't overflow */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+}
