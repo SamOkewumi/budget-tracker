@@ -18,18 +18,23 @@ const categories = {
 };
 
 
-// Initialize app
+// Call initialize when DOM loads
 document.addEventListener('DOMContentLoaded', () => {
+    initializeTheme();
+    
     loadExpenses();
-    renderExpenses();  // Remove renderCategoryFilters() call
+    renderExpenses();
     updateSummary();
     updateMonthDisplay();
-
+    
     // Show/hide frequency field based on recurring checkbox
-    document.getElementById('expense-recurring').addEventListener('change', (e) => {
-        const frequencyField = document.getElementById('frequency-field');
-        frequencyField.classList.toggle('hidden', !e.target.checked);
-    });
+    const recurringCheckbox = document.getElementById('expense-recurring');
+    if (recurringCheckbox) {
+        recurringCheckbox.addEventListener('change', (e) => {
+            const frequencyField = document.getElementById('frequency-field');
+            frequencyField.classList.toggle('hidden', !e.target.checked);
+        });
+    }
 });
 
 
@@ -164,15 +169,15 @@ function deleteExpense(id) {
     updateSummary();
 }
 
-// Render expenses list - ICON BESIDE CATEGORY
+// Render expenses list - WITH DARK MODE
 function renderExpenses() {
     const container = document.getElementById('expenses-list');
     const filtered = getFilteredExpenses();
-
+    
     if (filtered.length === 0) {
         container.innerHTML = `
-            <div class="text-center py-12 text-slate-400">
-                <svg class="w-20 h-20 mx-auto mb-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="text-center py-12 text-slate-400 dark:text-slate-500">
+                <svg class="w-20 h-20 mx-auto mb-4 text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
                 <p class="text-lg font-medium">No expenses found</p>
@@ -181,44 +186,44 @@ function renderExpenses() {
         `;
         return;
     }
-
+    
     // Sort by date (newest first)
     filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
-
+    
     let html = '<div class="space-y-2">';
-
+    
     filtered.forEach(expense => {
         const cat = categories[expense.category];
         const iconColor = cat.color;
-
+        
         html += `
-            <div class="group flex items-start justify-between gap-3 p-3 bg-white border border-slate-200 rounded-xl hover:border-slate-300 hover:shadow-sm transition-all cursor-pointer" onclick="editExpense('${expense.id}')">
-                <!-- Left: Content -->
+            <div class="group flex items-start justify-between gap-3 p-3 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl hover:border-slate-300 dark:hover:border-slate-500 hover:shadow-sm transition-all cursor-pointer" onclick="editExpense('${expense.id}')">
+                <!-- Content -->
                 <div class="flex-1 min-w-0">
                     <!-- Row 1: Description + Price -->
                     <div class="flex items-start justify-between gap-2 mb-1">
-                        <h3 class="font-semibold text-slate-900 uppercase leading-tight break-words flex-1">${expense.description}</h3>
+                        <h3 class="font-semibold text-slate-900 dark:text-white uppercase leading-tight break-words flex-1">${expense.description}</h3>
                         <div class="flex-shrink-0 text-right">
-                            <div class="text-lg font-bold text-slate-900 whitespace-nowrap">$${expense.amount.toFixed(2)}</div>
+                            <div class="text-lg font-bold text-slate-900 dark:text-white whitespace-nowrap">$${expense.amount.toFixed(2)}</div>
                         </div>
                     </div>
                     
                     <!-- Row 2: Date, Icon + Category, Recurring Badge -->
-                    <div class="flex items-center gap-1.5 text-xs text-slate-500 flex-wrap">
+                    <div class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 flex-wrap">
                         <span>${formatDate(expense.date)}</span>
                         <span>•</span>
                         <span class="inline-flex items-center gap-1" style="color: ${iconColor}">
                             ${getCategoryIcon(expense.category, 'w-3.5 h-3.5')}
-                            <span class="text-slate-500">${cat.name}</span>
+                            <span class="text-slate-500 dark:text-slate-400">${cat.name}</span>
                         </span>
-                        ${expense.recurring ? '<span>•</span><span class="inline-flex items-center px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full font-medium">Recurring</span>' : ''}
+                        ${expense.recurring ? '<span>•</span><span class="inline-flex items-center px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded-full font-medium">Recurring</span>' : ''}
                     </div>
                 </div>
                 
                 <!-- Right: Three Dot Menu -->
                 <div class="relative flex-shrink-0 self-start">
                     <button onclick="event.stopPropagation(); toggleExpenseMenu('${expense.id}')" 
-                            class="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                            class="p-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
                             id="menu-btn-${expense.id}">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
@@ -226,16 +231,16 @@ function renderExpenses() {
                     </button>
                     
                     <!-- Dropdown Menu -->
-                    <div id="menu-${expense.id}" class="hidden absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-50">
+                    <div id="menu-${expense.id}" class="hidden absolute right-0 mt-1 w-48 bg-white dark:bg-slate-700 rounded-lg shadow-lg border border-slate-200 dark:border-slate-600 py-1 z-50">
                         <button onclick="event.stopPropagation(); editExpense('${expense.id}'); closeAllMenus();" 
-                                class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2">
+                                class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
                             Edit
                         </button>
                         <button onclick="event.stopPropagation(); deleteExpense('${expense.id}'); closeAllMenus();" 
-                                class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
+                                class="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
@@ -246,10 +251,11 @@ function renderExpenses() {
             </div>
         `;
     });
-
+    
     html += '</div>';
     container.innerHTML = html;
 }
+
 
 
 
@@ -365,22 +371,26 @@ let currentView = 'treemap';
 // Switch between visualization views
 function switchVisualization(view) {
     currentView = view;
-
-    // Update button states
-    document.getElementById('view-treemap').className =
-        view === 'treemap'
-            ? 'px-3 py-1.5 text-sm font-medium rounded-md transition-colors bg-white text-slate-900 shadow-sm'
-            : 'px-3 py-1.5 text-sm font-medium rounded-md transition-colors text-slate-600 hover:text-slate-900';
-
-    document.getElementById('view-list').className =
-        view === 'list'
-            ? 'px-3 py-1.5 text-sm font-medium rounded-md transition-colors bg-white text-slate-900 shadow-sm'
-            : 'px-3 py-1.5 text-sm font-medium rounded-md transition-colors text-slate-600 hover:text-slate-900';
-
+    
+    // Update button states with dark mode support
+    const isDark = document.documentElement.classList.contains('dark');
+    
+    if (view === 'treemap') {
+        document.getElementById('view-treemap').className = 
+            'px-3 py-1.5 text-sm font-medium rounded-md transition-colors bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm';
+        document.getElementById('view-list').className = 
+            'px-3 py-1.5 text-sm font-medium rounded-md transition-colors text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
+    } else {
+        document.getElementById('view-treemap').className = 
+            'px-3 py-1.5 text-sm font-medium rounded-md transition-colors text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
+        document.getElementById('view-list').className = 
+            'px-3 py-1.5 text-sm font-medium rounded-md transition-colors bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm';
+    }
+    
     // Show/hide views
     document.getElementById('treemap-container').classList.toggle('hidden', view !== 'treemap');
     document.getElementById('category-list').classList.toggle('hidden', view !== 'list');
-
+    
     // Render appropriate view
     if (view === 'treemap') {
         renderTreemap();
@@ -388,6 +398,7 @@ function switchVisualization(view) {
         renderCategoryList();
     }
 }
+
 
 // Render treemap visualization
 function renderTreemap() {
@@ -432,7 +443,72 @@ function renderTreemap() {
     createTreemap(data, '#treemap-chart');
 }
 
-// Update the category list click to show it's filtered
+// Dark mode functionality - PROPERLY FIXED
+function toggleDarkMode() {
+    const html = document.documentElement;
+    const isDark = html.classList.contains('dark'); // Check DOM, not localStorage!
+    
+    console.log('DOM has dark class:', isDark); // Debug
+    
+    if (isDark) {
+        // Currently dark, switch to light
+        html.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        updateThemeIcons('light');
+        console.log('Switched to light mode'); // Debug
+    } else {
+        // Currently light, switch to dark
+        html.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        updateThemeIcons('dark');
+        console.log('Switched to dark mode'); // Debug
+    }
+    
+    // Re-render treemap if visible
+    if (typeof currentView !== 'undefined' && currentView === 'treemap') {
+        setTimeout(() => renderTreemap(), 100);
+    }
+}
+
+
+function updateThemeIcons(theme) {
+    const lightIcon = document.getElementById('theme-toggle-light-icon');
+    const darkIcon = document.getElementById('theme-toggle-dark-icon');
+    
+    if (!lightIcon || !darkIcon) {
+        console.error('Theme icons not found!');
+        return;
+    }
+    
+    if (theme === 'dark') {
+        // In dark mode, show sun icon (to switch back to light)
+        lightIcon.classList.remove('hidden');
+        darkIcon.classList.add('hidden');
+    } else {
+        // In light mode, show moon icon (to switch to dark)
+        lightIcon.classList.add('hidden');
+        darkIcon.classList.remove('hidden');
+    }
+}
+
+// Initialize theme on page load
+function initializeTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    console.log('Initializing theme:', savedTheme); // Debug
+    
+    const html = document.documentElement;
+    
+    if (savedTheme === 'dark') {
+        html.classList.add('dark');
+    } else {
+        html.classList.remove('dark');
+    }
+    
+    // Update icons after a brief delay to ensure DOM is ready
+    setTimeout(() => updateThemeIcons(savedTheme), 50);
+}
+
+// Render category list view - WITH DARK MODE
 function renderCategoryList() {
     const filtered = getFilteredExpenses();
     const container = document.getElementById('category-list');
@@ -476,8 +552,8 @@ function renderCategoryList() {
         html += `
             <div class="flex items-center gap-4 p-4 border rounded-lg transition-colors cursor-pointer ${
                 isActive 
-                    ? 'border-indigo-500 bg-indigo-50' 
-                    : 'border-slate-200 hover:border-slate-300'
+                    ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' 
+                    : 'border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500'
             }"
                  onclick="filterByCategory('${key}')">
                 <!-- Color Indicator -->
@@ -490,20 +566,20 @@ function renderCategoryList() {
                         ${getCategoryIcon(key, 'w-5 h-5')}
                     </div>
                     <div class="flex-1 min-w-0">
-                        <h3 class="font-semibold text-slate-900">${cat.name}</h3>
-                        <p class="text-sm text-slate-500">${cat.count} transaction${cat.count !== 1 ? 's' : ''}</p>
+                        <h3 class="font-semibold text-slate-900 dark:text-white">${cat.name}</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">${cat.count} transaction${cat.count !== 1 ? 's' : ''}</p>
                     </div>
                 </div>
                 
                 <!-- Amount & Percentage -->
                 <div class="text-right">
-                    <div class="text-lg font-bold text-slate-900">$${cat.amount.toFixed(2)}</div>
-                    <div class="text-sm text-slate-500">${percentage}%</div>
+                    <div class="text-lg font-bold text-slate-900 dark:text-white">$${cat.amount.toFixed(2)}</div>
+                    <div class="text-sm text-slate-500 dark:text-slate-400">${percentage}%</div>
                 </div>
                 
                 <!-- Progress Bar -->
                 <div class="hidden sm:block w-24">
-                    <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div class="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                         <div class="h-full rounded-full transition-all" 
                              style="width: ${percentage}%; background-color: ${cat.color}"></div>
                     </div>
@@ -514,6 +590,7 @@ function renderCategoryList() {
     
     container.innerHTML = html;
 }
+
 
 // Update summary cards
 function updateSummary() {

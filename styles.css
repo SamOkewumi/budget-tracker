@@ -115,3 +115,47 @@ textarea:focus-visible {
         font-size: 16px !important; /* Prevents iOS zoom */
     }
 }
+
+/* Dark mode transitions */
+* {
+    transition-property: background-color, border-color, color;
+    transition-duration: 200ms;
+    transition-timing-function: ease-in-out;
+}
+
+/* Scrollbar styling for dark mode */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    @apply bg-slate-100 dark:bg-slate-800;
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 dark:bg-slate-600 rounded-lg;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400 dark:bg-slate-500;
+}
+
+/* Modal backdrop dark mode */
+.modal {
+    backdrop-filter: blur(4px);
+}
+
+/* Dark mode for inputs */
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+select:focus,
+textarea:focus {
+    @apply dark:bg-slate-700 dark:border-slate-600;
+}
+
+/* Chart container dark mode */
+#treemap-chart svg text {
+    transition: none !important;
+}
