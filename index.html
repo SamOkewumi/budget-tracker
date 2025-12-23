@@ -103,6 +103,53 @@
             </div>
         </div>
 
+        <!-- Spending Visualization -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    <h2 class="text-xl font-bold text-slate-900">Spending Breakdown</h2>
+                </div>
+
+                <!-- View Toggle -->
+                <div class="flex items-center gap-2 bg-slate-100 rounded-lg p-1">
+                    <button onclick="switchVisualization('treemap')" id="view-treemap"
+                        class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors bg-white text-slate-900 shadow-sm">
+                        Treemap
+                    </button>
+                    <button onclick="switchVisualization('list')" id="view-list"
+                        class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors text-slate-600 hover:text-slate-900">
+                        List
+                    </button>
+                </div>
+            </div>
+
+            <!-- Treemap Container -->
+            <div id="treemap-container" class="relative">
+                <div id="treemap-chart" class="w-full" style="min-height: 400px;"></div>
+            </div>
+
+            <!-- Category List View (Hidden by default) -->
+            <div id="category-list" class="hidden space-y-3">
+                <!-- Will be populated dynamically -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="viz-empty-state" class="hidden text-center py-12 text-slate-400">
+                <svg class="w-16 h-16 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <p class="text-lg font-medium">No spending data</p>
+                <p class="text-sm mt-1">Add expenses to see your breakdown</p>
+            </div>
+        </div>
+
+
 
         <!-- Month Selector -->
         <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
@@ -457,10 +504,13 @@
     </div>
     </div>
 
-
+    
     <!-- Scripts -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
     <script src="storage.js"></script>
     <script src="icons.js"></script>
+    <script src="treemap.js"></script>
     <script src="app.js"></script>
 
 

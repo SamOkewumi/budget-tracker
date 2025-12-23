@@ -39,16 +39,16 @@ function openExpenseModal() {
     document.getElementById('expense-form').reset();
     document.getElementById('expense-id').value = '';
     document.getElementById('modal-title').textContent = 'Add Expense';
-    
+
     // Set today's date
     document.getElementById('expense-date').value = new Date().toISOString().split('T')[0];
-    
+
     // Hide frequency field
     document.getElementById('frequency-field').classList.add('hidden');
-    
+
     // Hide delete button when adding new
     document.getElementById('delete-expense-btn').classList.add('hidden');
-    
+
     // Show modal
     document.getElementById('expense-modal').classList.remove('hidden');
 }
@@ -128,10 +128,10 @@ function handleExpenseSubmit(event) {
 function editExpense(id) {
     const expense = expenses.find(e => e.id === id);
     if (!expense) return;
-    
+
     // Update modal title
     document.getElementById('modal-title').textContent = 'Edit Expense';
-    
+
     // Fill form fields
     document.getElementById('expense-id').value = expense.id;
     document.getElementById('expense-date').value = expense.date;
@@ -141,14 +141,14 @@ function editExpense(id) {
     document.getElementById('expense-recurring').checked = expense.recurring;
     document.getElementById('expense-frequency').value = expense.frequency || 'monthly';
     document.getElementById('expense-notes').value = expense.notes || '';
-    
+
     // Show/hide frequency field
     const frequencyField = document.getElementById('frequency-field');
     frequencyField.classList.toggle('hidden', !expense.recurring);
-    
+
     // Show delete button in edit mode
     document.getElementById('delete-expense-btn').classList.remove('hidden');
-    
+
     // Show modal
     document.getElementById('expense-modal').classList.remove('hidden');
 }
@@ -168,7 +168,7 @@ function deleteExpense(id) {
 function renderExpenses() {
     const container = document.getElementById('expenses-list');
     const filtered = getFilteredExpenses();
-    
+
     if (filtered.length === 0) {
         container.innerHTML = `
             <div class="text-center py-12 text-slate-400">
@@ -181,16 +181,16 @@ function renderExpenses() {
         `;
         return;
     }
-    
+
     // Sort by date (newest first)
     filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
-    
+
     let html = '<div class="space-y-2">';
-    
+
     filtered.forEach(expense => {
         const cat = categories[expense.category];
         const iconColor = cat.color;
-        
+
         html += `
             <div class="group flex items-start justify-between gap-3 p-3 bg-white border border-slate-200 rounded-xl hover:border-slate-300 hover:shadow-sm transition-all cursor-pointer" onclick="editExpense('${expense.id}')">
                 <!-- Left: Content -->
@@ -246,7 +246,7 @@ function renderExpenses() {
             </div>
         `;
     });
-    
+
     html += '</div>';
     container.innerHTML = html;
 }
@@ -258,6 +258,7 @@ let searchQuery = '';
 
 function handleSearch(query) {
     searchQuery = query.toLowerCase().trim();
+    updateFilterUI();
     renderExpenses();
     updateActiveFilters();
 }
@@ -304,24 +305,214 @@ function updateActiveFilters() {
     }
 }
 
-// Clear all filters
+// Clear all filters and UI
 function clearFilters() {
     currentFilter = 'all';
     searchQuery = '';
     document.getElementById('category-dropdown').value = 'all';
     document.getElementById('search-input').value = '';
+    updateFilterUI();
     renderExpenses();
     updateActiveFilters();
 }
 
+// New function: Clear all filters (more explicit)
+function clearAllFilters() {
+    clearFilters();
+    updateSummary(); // Also refresh visualization
+}
 
-// Update filterByCategory to work with dropdown
+// Update filterByCategory to show clear button
 function filterByCategory(category) {
     currentFilter = category;
     const dropdown = document.getElementById('category-dropdown');
     if (dropdown) dropdown.value = category;
+    
+    // Show/hide clear button and badge
+    updateFilterUI();
+    
     renderExpenses();
     updateActiveFilters();
+}
+
+// New function: Update filter UI indicators
+function updateFilterUI() {
+    const hasCategoryFilter = currentFilter !== 'all';
+    const hasSearchFilter = searchQuery && searchQuery.length > 0;
+    const hasAnyFilter = hasCategoryFilter || hasSearchFilter;
+    
+    // Show/hide clear button in visualization
+    const clearBtn = document.getElementById('clear-viz-filter');
+    const filterBadge = document.getElementById('viz-filter-badge');
+    
+    if (clearBtn) {
+        clearBtn.classList.toggle('hidden', !hasAnyFilter);
+    }
+    
+    if (filterBadge) {
+        if (hasCategoryFilter) {
+            filterBadge.textContent = categories[currentFilter].name;
+            filterBadge.classList.remove('hidden');
+        } else {
+            filterBadge.classList.add('hidden');
+        }
+    }
+}
+
+// Visualization state
+let currentView = 'treemap';
+
+// Switch between visualization views
+function switchVisualization(view) {
+    currentView = view;
+
+    // Update button states
+    document.getElementById('view-treemap').className =
+        view === 'treemap'
+            ? 'px-3 py-1.5 text-sm font-medium rounded-md transition-colors bg-white text-slate-900 shadow-sm'
+            : 'px-3 py-1.5 text-sm font-medium rounded-md transition-colors text-slate-600 hover:text-slate-900';
+
+    document.getElementById('view-list').className =
+        view === 'list'
+            ? 'px-3 py-1.5 text-sm font-medium rounded-md transition-colors bg-white text-slate-900 shadow-sm'
+            : 'px-3 py-1.5 text-sm font-medium rounded-md transition-colors text-slate-600 hover:text-slate-900';
+
+    // Show/hide views
+    document.getElementById('treemap-container').classList.toggle('hidden', view !== 'treemap');
+    document.getElementById('category-list').classList.toggle('hidden', view !== 'list');
+
+    // Render appropriate view
+    if (view === 'treemap') {
+        renderTreemap();
+    } else {
+        renderCategoryList();
+    }
+}
+
+// Render treemap visualization
+function renderTreemap() {
+    const filtered = getFilteredExpenses();
+
+    if (filtered.length === 0) {
+        document.getElementById('treemap-chart').innerHTML = '';
+        document.getElementById('viz-empty-state').classList.remove('hidden');
+        return;
+    }
+
+    document.getElementById('viz-empty-state').classList.add('hidden');
+
+    // Calculate totals by category
+    const categoryData = {};
+    filtered.forEach(expense => {
+        if (!categoryData[expense.category]) {
+            categoryData[expense.category] = {
+                name: categories[expense.category].name,
+                value: 0,
+                color: categories[expense.category].color,
+                count: 0
+            };
+        }
+        categoryData[expense.category].value += expense.amount;
+        categoryData[expense.category].count += 1;
+    });
+
+    // Convert to array format for D3
+    const data = {
+        name: 'spending',
+        children: Object.keys(categoryData).map(key => ({
+            name: categoryData[key].name,
+            value: categoryData[key].value,
+            color: categoryData[key].color,
+            count: categoryData[key].count,
+            category: key
+        }))
+    };
+
+    // Call treemap rendering function
+    createTreemap(data, '#treemap-chart');
+}
+
+// Update the category list click to show it's filtered
+function renderCategoryList() {
+    const filtered = getFilteredExpenses();
+    const container = document.getElementById('category-list');
+    
+    if (filtered.length === 0) {
+        container.innerHTML = '';
+        document.getElementById('viz-empty-state').classList.remove('hidden');
+        return;
+    }
+    
+    document.getElementById('viz-empty-state').classList.add('hidden');
+    
+    // Calculate totals by category
+    const categoryData = {};
+    let total = 0;
+    
+    filtered.forEach(expense => {
+        if (!categoryData[expense.category]) {
+            categoryData[expense.category] = {
+                name: categories[expense.category].name,
+                amount: 0,
+                color: categories[expense.category].color,
+                count: 0
+            };
+        }
+        categoryData[expense.category].amount += expense.amount;
+        categoryData[expense.category].count += 1;
+        total += expense.amount;
+    });
+    
+    // Sort by amount descending
+    const sorted = Object.entries(categoryData)
+        .sort((a, b) => b[1].amount - a[1].amount);
+    
+    // Render list
+    let html = '';
+    sorted.forEach(([key, cat]) => {
+        const percentage = ((cat.amount / total) * 100).toFixed(1);
+        const isActive = currentFilter === key;
+        
+        html += `
+            <div class="flex items-center gap-4 p-4 border rounded-lg transition-colors cursor-pointer ${
+                isActive 
+                    ? 'border-indigo-500 bg-indigo-50' 
+                    : 'border-slate-200 hover:border-slate-300'
+            }"
+                 onclick="filterByCategory('${key}')">
+                <!-- Color Indicator -->
+                <div class="w-1 h-12 rounded-full" style="background-color: ${cat.color}"></div>
+                
+                <!-- Icon & Name -->
+                <div class="flex items-center gap-2 flex-1 min-w-0">
+                    <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center" 
+                         style="background-color: ${cat.color}20; color: ${cat.color}">
+                        ${getCategoryIcon(key, 'w-5 h-5')}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-semibold text-slate-900">${cat.name}</h3>
+                        <p class="text-sm text-slate-500">${cat.count} transaction${cat.count !== 1 ? 's' : ''}</p>
+                    </div>
+                </div>
+                
+                <!-- Amount & Percentage -->
+                <div class="text-right">
+                    <div class="text-lg font-bold text-slate-900">$${cat.amount.toFixed(2)}</div>
+                    <div class="text-sm text-slate-500">${percentage}%</div>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="hidden sm:block w-24">
+                    <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full transition-all" 
+                             style="width: ${percentage}%; background-color: ${cat.color}"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
 }
 
 // Update summary cards
@@ -352,26 +543,34 @@ function updateSummary() {
 
     if (topCategoryKey) {
         const topCat = categories[topCategoryKey];
-        document.getElementById('top-category').textContent = topCat.name; // ← REMOVED emoji/undefined
+        document.getElementById('top-category').textContent = topCat.name;
         document.getElementById('top-category-amount').textContent = `$${categoryTotals[topCategoryKey].toFixed(2)}`;
     } else {
         document.getElementById('top-category').textContent = '-';
         document.getElementById('top-category-amount').textContent = '$0.00';
     }
+
+    // Update visualization
+    if (currentView === 'treemap') {
+        renderTreemap();
+    } else {
+        renderCategoryList();
+    }
 }
 
 // Month navigation
 function previousMonth() {
-    currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
+    currentMonth.setMonth(currentMonth.getMonth() - 1);
     updateMonthDisplay();
-    renderExpenses();
+    clearAllFilters(); // Reset filter when changing months
     updateSummary();
 }
 
+// Update nextMonth to reset filter
 function nextMonth() {
-    currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+    currentMonth.setMonth(currentMonth.getMonth() + 1);
     updateMonthDisplay();
-    renderExpenses();
+    clearAllFilters(); // Reset filter when changing months
     updateSummary();
 }
 
@@ -384,7 +583,7 @@ function updateMonthDisplay() {
 function formatDate(dateString) {
     const date = new Date(dateString);
     const isMobile = window.innerWidth < 640;
-    
+
     if (isMobile) {
         // Shorter format for mobile: "Dec 21"
         const options = { month: 'short', day: 'numeric' };

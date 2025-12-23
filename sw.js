@@ -1,4 +1,4 @@
-const CACHE_NAME = 'oke-finance-v1';
+const CACHE_NAME = 'oke-finance-v2'; // Increment version
 
 // Auto-detect base path
 const getBasePath = () => {
@@ -15,6 +15,7 @@ const urlsToCache = [
   BASE_PATH + '/app.js',
   BASE_PATH + '/storage.js',
   BASE_PATH + '/icons.js',
+  BASE_PATH + '/treemap.js',
   BASE_PATH + '/styles.css',
   BASE_PATH + '/manifest.json',
   BASE_PATH + '/icons/icon-192.png',
