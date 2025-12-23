@@ -347,23 +347,23 @@ function updateFilterUI() {
     const hasSearchFilter = searchQuery && searchQuery.length > 0;
     const hasAnyFilter = hasCategoryFilter || hasSearchFilter;
     
-    // Show/hide clear button in visualization
-    const clearBtn = document.getElementById('clear-viz-filter');
+    // Show/hide filter row and badge
+    const filterRow = document.getElementById('viz-filter-row');
     const filterBadge = document.getElementById('viz-filter-badge');
     
-    if (clearBtn) {
-        clearBtn.classList.toggle('hidden', !hasAnyFilter);
+    if (filterRow) {
+        filterRow.classList.toggle('hidden', !hasAnyFilter);
     }
     
     if (filterBadge) {
         if (hasCategoryFilter) {
             filterBadge.textContent = categories[currentFilter].name;
-            filterBadge.classList.remove('hidden');
-        } else {
-            filterBadge.classList.add('hidden');
+        } else if (hasSearchFilter) {
+            filterBadge.textContent = `Search: "${searchQuery}"`;
         }
     }
 }
+
 
 // Visualization state
 let currentView = 'treemap';
@@ -372,19 +372,17 @@ let currentView = 'treemap';
 function switchVisualization(view) {
     currentView = view;
     
-    // Update button states with dark mode support
-    const isDark = document.documentElement.classList.contains('dark');
-    
+    // Update button states with enhanced active styling
     if (view === 'treemap') {
         document.getElementById('view-treemap').className = 
-            'px-3 py-1.5 text-sm font-medium rounded-md transition-colors bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm';
+            'px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-all bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm scale-105';
         document.getElementById('view-list').className = 
-            'px-3 py-1.5 text-sm font-medium rounded-md transition-colors text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
+            'px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
     } else {
         document.getElementById('view-treemap').className = 
-            'px-3 py-1.5 text-sm font-medium rounded-md transition-colors text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
+            'px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
         document.getElementById('view-list').className = 
-            'px-3 py-1.5 text-sm font-medium rounded-md transition-colors bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm';
+            'px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-all bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm scale-105';
     }
     
     // Show/hide views
@@ -398,6 +396,7 @@ function switchVisualization(view) {
         renderCategoryList();
     }
 }
+
 
 
 // Render treemap visualization

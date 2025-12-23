@@ -32,14 +32,17 @@
 
 <body class="bg-slate-50 dark:bg-slate-950 transition-colors">
 
-    <!-- Dark Mode Script - Must run before page renders -->
+    <!-- Configure Tailwind Dark Mode -->
     <script>
-        // Check for saved theme preference or default to light mode
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    screens: {
+                        'xs': '475px', // Extra small breakpoint for better mobile control
+                    }
+                }
+            }
         }
     </script>
 
@@ -152,44 +155,47 @@
         <!-- Spending Visualization -->
         <div
             class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-6 mb-6 border border-slate-100 dark:border-slate-700">
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center gap-2">
-                    <svg class="w-5 h-5 text-slate-600 dark:text-slate-400" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                    <h2 class="text-xl font-bold text-slate-900 dark:text-white">Spending Breakdown</h2>
+            <!-- Header - Stacked on Mobile -->
+            <div class="mb-4 space-y-3 sm:space-y-0">
+                <!-- Row 1: Title + Toggle (always together) -->
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <svg class="w-5 h-5 text-slate-600 dark:text-slate-400 flex-shrink-0" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        <h2 class="text-xl font-bold text-slate-900 dark:text-white truncate">Spending Breakdown</h2>
+                    </div>
 
-                    <!-- Active Filter Badge -->
-                    <span id="viz-filter-badge"
-                        class="hidden px-3 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 text-xs font-medium rounded-full">
-                        Filtered
-                    </span>
+                    <!-- View Toggle - Always visible -->
+                    <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 rounded-lg p-1 flex-shrink-0">
+                        <button onclick="switchVisualization('treemap')" id="view-treemap"
+                            class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm">
+                            <span class="hidden xs:inline">Treemap</span>
+                            <span class="xs:hidden">Tree</span>
+                        </button>
+                        <button onclick="switchVisualization('list')" id="view-list"
+                            class="px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+                            List
+                        </button>
+                    </div>
                 </div>
 
-                <div class="flex items-center gap-2">
-                    <!-- Clear Filter Button -->
+                <!-- Row 2: Filter Badge + Clear (only when filter active) -->
+                <div id="viz-filter-row" class="hidden flex items-center gap-2">
+                    <span id="viz-filter-badge"
+                        class="inline-flex items-center px-3 py-1.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 text-sm font-medium rounded-lg">
+                        Filtered
+                    </span>
                     <button onclick="clearAllFilters()" id="clear-viz-filter"
-                        class="hidden px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-1">
+                        class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M6 18L18 6M6 6l12 12" />
                         </svg>
-                        Clear
+                        <span>Clear</span>
                     </button>
-
-                    <!-- View Toggle -->
-                    <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
-                        <button onclick="switchVisualization('treemap')" id="view-treemap"
-                            class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm">
-                            Treemap
-                        </button>
-                        <button onclick="switchVisualization('list')" id="view-list"
-                            class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
-                            List
-                        </button>
-                    </div>
                 </div>
             </div>
 
@@ -214,6 +220,7 @@
                 <p class="text-sm mt-1">Add expenses to see your breakdown</p>
             </div>
         </div>
+
 
 
         <!-- Month Selector -->
