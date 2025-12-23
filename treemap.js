@@ -35,14 +35,15 @@ function createTreemap(data, selector) {
     
     // Add rectangles
     cell.append('rect')
-        .attr('width', d => d.x1 - d.x0)
-        .attr('height', d => d.y1 - d.y0)
-        .attr('fill', d => d.data.color)
-        .attr('opacity', d => currentFilter === d.data.category ? 1 : 0.8) // Highlight if selected
-        .attr('rx', 6)
-        .attr('stroke', d => currentFilter === d.data.category ? '#4F46E5' : 'none') // Border if selected
-        .attr('stroke-width', d => currentFilter === d.data.category ? 3 : 0)
-        .style('cursor', 'pointer')
+    .attr('width', d => d.x1 - d.x0)
+    .attr('height', d => d.y1 - d.y0)
+    .attr('fill', d => d.data.color)
+    .attr('opacity', d => currentFilter === d.data.category ? 1 : 0.8)
+    .attr('rx', 6)
+    .attr('stroke', d => currentFilter === d.data.category ? '#4F46E5' : 'none')
+    .attr('stroke-width', d => currentFilter === d.data.category ? 4 : 0)
+    .attr('class', d => currentFilter === d.data.category ? 'treemap-selected' : '')
+    .style('cursor', 'pointer')
         .on('mouseover', function() {
             d3.select(this).attr('opacity', 1);
         })
