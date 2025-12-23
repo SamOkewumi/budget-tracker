@@ -1,23 +1,29 @@
-# Budget Tracker
+# 💰 OKE Finance
 
-Privacy-first expense tracking that works entirely in your browser. All data stays on your device.
+Privacy-first expense tracking PWA. All your data stays on your device.
 
 ## Features
 
-✅ **Privacy First** - No cloud, no tracking, no accounts  
-📱 **Works Offline** - PWA with offline support  
-📊 **Clean Interface** - Simple and intuitive  
-🔄 **Recurring Expenses** - Track subscriptions separately  
-💾 **Export/Import** - JSON and CSV support  
+- 📊 Track expenses by category
+- 🔄 Manage recurring expenses
+- 📱 Works offline (PWA)
+- 🔒 Privacy-first - all data stored locally
+- 📈 Visual spending insights
+- 💾 Export/import data
 
 ## Quick Start
 
-1. Open `index.html` in your browser
-2. Click "Add Expense" to get started
-3. Add to home screen for app-like experience (mobile)
+1. Open `index.html` in a browser
+2. Add your first expense
+3. Install as PWA on mobile for best experience
 
-## Development
+## Tech Stack
 
-No build step required! Just open the files in a browser.
+- Vanilla JavaScript
+- TailwindCSS
+- LocalStorage
+- Service Worker (PWA)
 
-For local development with HTTPS (required for PWA features):
+---
+
+Built with ❤️ for financial privacy

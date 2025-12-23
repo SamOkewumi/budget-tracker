@@ -1,6 +1,6 @@
 {
-    "name": "Budget Tracker",
-    "short_name": "Budget",
+    "name": "OKE Finance",
+    "short_name": "OKE",
     "description": "Privacy-first expense tracking - all data stays on your device",
     "start_url": "./",
     "scope": "./",

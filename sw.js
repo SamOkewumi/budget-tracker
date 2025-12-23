@@ -1,4 +1,4 @@
-const CACHE_NAME = 'budget-tracker-v2'; // Increment version when you make changes
+const CACHE_NAME = 'oke-finance-v1';
 
 // Auto-detect base path
 const getBasePath = () => {
